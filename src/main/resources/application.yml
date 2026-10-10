@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: rto-shield
+  datasource:
+    url: jdbc:postgresql://localhost:5433/rtoshield
+    username: rto
+    password: rto
+    connection-init-sql: SET TIME ZONE 'Asia/Kolkata'
+  jpa:
+    hibernate:
+      ddl-auto: update        # tables are created from the entity classes (no Flyway, on purpose)
+    open-in-view: false
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
