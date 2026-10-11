@@ -69,6 +69,8 @@ public class OrderService {
         DecisionOutcome decision = router.decide(order, score);
         order.setJourney(decision.journey());
         order.setDecisionReason(decision.reason());
+        order.setExpectedLoss(decision.expectedLoss());
+        order.setActionCost(decision.actionCost());
         if (decision.courierId() != null) {
             couriers.findById(decision.courierId()).ifPresent(order::setCourier);
         }

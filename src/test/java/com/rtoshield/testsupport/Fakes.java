@@ -82,6 +82,15 @@ public final class Fakes {
         }
     }
 
+    /** couriers table holding exactly these couriers. */
+    public static CourierRepository courierRepo(List<Courier> couriers) {
+        return proxy(CourierRepository.class, (method, args) -> switch (method) {
+            case "findAll" -> List.copyOf(couriers);
+            case "findById" -> couriers.stream().filter(c -> c.getId().equals(args[0])).findFirst();
+            default -> throw new UnsupportedOperationException("CourierRepository." + method);
+        });
+    }
+
     /** couriers table: every id exists. */
     public static CourierRepository courierRepo() {
         return proxy(CourierRepository.class, (method, args) -> switch (method) {

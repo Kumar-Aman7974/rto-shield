@@ -81,6 +81,17 @@ public final class ConfigKeys {
     // ---- share of genuine customers who abandon when forced to pay online ----
     public static final String DROPOFF_PREPAID_RATE = "dropoff.prepaid_rate";
 
+    // ---- journey economics (M4). These are ASSUMPTIONS: tune them with the merchant's real data. ----
+    // fail_reduction = share of would-be failures the journey stops; dropoff = share of genuine customers lost to the extra step
+    public static final String JOURNEY_OTP_FAIL_REDUCTION = "journey.otp_confirm.fail_reduction";
+    public static final String JOURNEY_OTP_DROPOFF = "journey.otp_confirm.dropoff";
+    public static final String JOURNEY_PARTIAL_FAIL_REDUCTION = "journey.partial_cod.fail_reduction";
+    public static final String JOURNEY_PARTIAL_DROPOFF = "journey.partial_cod.dropoff";
+    public static final String JOURNEY_PREPAID_FAIL_REDUCTION = "journey.prepaid_incentive.fail_reduction";
+    public static final String JOURNEY_PREPAID_DISCOUNT_RATE = "journey.prepaid_incentive.discount_rate";
+    public static final String JOURNEY_HUMAN_FAIL_REDUCTION = "journey.human_review.fail_reduction";
+    public static final String JOURNEY_HUMAN_DROPOFF = "journey.human_review.dropoff";
+
     // ---- timers (minutes, so the demo can shrink them) ----
     public static final String CONFIRM_REMINDER_MINUTES = "confirm.reminder_minutes";
     public static final String DELAY_ALERT_MINUTES = "delay.alert_minutes";
@@ -157,6 +168,15 @@ public final class ConfigKeys {
         DEFAULTS.put(PEN_REPEAT_PHONE, "10");
 
         DEFAULTS.put(DROPOFF_PREPAID_RATE, "0.15");
+
+        DEFAULTS.put(JOURNEY_OTP_FAIL_REDUCTION, "0.50");
+        DEFAULTS.put(JOURNEY_OTP_DROPOFF, "0.05");
+        DEFAULTS.put(JOURNEY_PARTIAL_FAIL_REDUCTION, "0.65");
+        DEFAULTS.put(JOURNEY_PARTIAL_DROPOFF, "0.12");
+        DEFAULTS.put(JOURNEY_PREPAID_FAIL_REDUCTION, "0.90");
+        DEFAULTS.put(JOURNEY_PREPAID_DISCOUNT_RATE, "0.03");
+        DEFAULTS.put(JOURNEY_HUMAN_FAIL_REDUCTION, "0.80");
+        DEFAULTS.put(JOURNEY_HUMAN_DROPOFF, "0.10");
 
         DEFAULTS.put(CONFIRM_REMINDER_MINUTES, "120");
         DEFAULTS.put(DELAY_ALERT_MINUTES, "2880");

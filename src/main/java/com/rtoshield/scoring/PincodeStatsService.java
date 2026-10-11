@@ -49,9 +49,16 @@ public class PincodeStatsService {
                 .orElse(UNKNOWN_SUCCESS_RATE);
     }
 
-    /** Success rate (0.0 to 1.0) of one courier in one pincode. */
+    /**
+     * Success rate (0.0 to 1.0) of one courier in one pincode.
+     * Falls back to the default (0.80) if the pincode is null, there is no row, or the row has no attempts yet.
+     */
     public double courierSuccessRate(Long courierId, String pincode) {
+        if (pincode == null) {
+            return UNKNOWN_SUCCESS_RATE;
+        }
         return stats.findByCourierIdAndPincode(courierId, pincode)
+                .filter(row -> row.getAttempts() > 0)
                 .map(CourierPincodeStat::successRate)
                 .orElse(UNKNOWN_SUCCESS_RATE);
     }

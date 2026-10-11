@@ -64,6 +64,11 @@ public class Order {
 
     @Column(length = 2000)
     private String decisionReason;
+    @Column(precision = 12, scale = 2)
+    private BigDecimal expectedLoss;
+
+    @Column(precision = 12, scale = 2)
+    private BigDecimal actionCost;
 
     @ManyToOne
     @JoinColumn(name = "courier_id")

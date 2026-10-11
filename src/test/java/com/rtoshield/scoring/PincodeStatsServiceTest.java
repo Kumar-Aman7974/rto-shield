@@ -69,4 +69,21 @@ class PincodeStatsServiceTest {
         assertThat(row.getAttempts()).isEqualTo(1);
         assertThat(row.getSuccesses()).isEqualTo(1);
     }
+
+    @Test
+    void nullPincodeFallsBackToTheDefaultRate() {
+        assertThat(service.courierSuccessRate(1L, null)).isEqualTo(0.80);
+    }
+
+    @Test
+    void rowWithNoAttemptsFallsBackToTheDefaultRate() {
+        store.setPincode("700001", 0, 0, 0);
+        store.rows.forEach(row -> {
+            row.setAttempts(0);
+            row.setSuccesses(0);
+        });
+
+        assertThat(service.courierSuccessRate(1L, "700001")).isEqualTo(0.80);
+        assertThat(service.hasHistory("700001")).isFalse();
+    }
 }
