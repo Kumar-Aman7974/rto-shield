@@ -33,7 +33,7 @@ Mark TODO / DOING / DONE here when you start and finish.
 | M0 | Setup + skeleton | both | DONE (this repo)                                                                               |
 | M1 | Data + seed + base config | A | DONE (seed data, ConfigService, GET /customers /products /couriers /courier-stats)             |
 | M2 | Order intake | A | DONE (basic): POST /orders, store webhook, GET /orders. Sharpen address quality if time allows |
-| M3 | Order-health score | A | TODO (stub in `scoring/RuleBasedHealthScorer`)                                                 |
+| M3 | Order-health score | A | DONE (stub in `scoring/RuleBasedHealthScorer`)                                                 |
 | M4 | Journey router + ProfitCalculator | A | TODO (stub router; ProfitCalculator maths done, `chooseRescueAction` is a stub)                |
 | M5 | Journey execution | B | TODO (stub in `confirmation/JourneyExecutor`)                                                  |
 | M6 | Delivery events | B | TODO (stub in `delivery/DeliveryStateService`)                                                 |

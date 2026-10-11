@@ -11,17 +11,23 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * DONE (basic version). Pincode behaviour comes from courier_pincode_stats.
+ * Pincode behaviour comes from the courier_pincode_stats table (attempts and successes per courier per pincode).
  * Person B calls recordResult(...) after every delivery result so the learning loop closes.
  */
 @Service
 @RequiredArgsConstructor
 public class PincodeStatsService {
 
-    private static final double UNKNOWN_PINCODE_SUCCESS_RATE = 0.80;
+    private static final double UNKNOWN_SUCCESS_RATE = 0.80;
+    private static final double UNKNOWN_REFUSAL_RATE = 0.20;
 
     private final CourierPincodeStatRepository stats;
     private final CourierRepository couriers;
+
+    /** true if we have at least one recorded delivery attempt in this pincode. */
+    public boolean hasHistory(String pincode) {
+        return stats.findByPincode(pincode).stream().anyMatch(row -> row.getAttempts() > 0);
+    }
 
     /** Share of deliveries that failed in this pincode, across all couriers (0.0 to 1.0). */
     public double refusalRate(String pincode) {
@@ -29,16 +35,25 @@ public class PincodeStatsService {
         int attempts = rows.stream().mapToInt(CourierPincodeStat::getAttempts).sum();
         int successes = rows.stream().mapToInt(CourierPincodeStat::getSuccesses).sum();
         if (attempts == 0) {
-            return 1.0 - UNKNOWN_PINCODE_SUCCESS_RATE;
+            return UNKNOWN_REFUSAL_RATE;
         }
-        return 1.0 - ((double) successes / attempts);
+        return (double) (attempts - successes) / attempts;
+    }
+
+    /** Success rate (0.0 to 1.0) of the best courier in this pincode. */
+    public double bestCourierSuccessRate(String pincode) {
+        return stats.findByPincode(pincode).stream()
+                .filter(row -> row.getAttempts() > 0)
+                .mapToDouble(CourierPincodeStat::successRate)
+                .max()
+                .orElse(UNKNOWN_SUCCESS_RATE);
     }
 
     /** Success rate (0.0 to 1.0) of one courier in one pincode. */
     public double courierSuccessRate(Long courierId, String pincode) {
         return stats.findByCourierIdAndPincode(courierId, pincode)
                 .map(CourierPincodeStat::successRate)
-                .orElse(UNKNOWN_PINCODE_SUCCESS_RATE);
+                .orElse(UNKNOWN_SUCCESS_RATE);
     }
 
     /** Call after a delivery result: success = delivered, not success = failed / RTO. */
