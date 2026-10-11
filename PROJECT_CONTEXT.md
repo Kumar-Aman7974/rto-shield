@@ -28,22 +28,22 @@ The simulator uses invented data. We say so openly in the demo.
 
 Mark TODO / DOING / DONE here when you start and finish.
 
-| # | Module | Owner | Status |
-|---|---|---|---|
-| M0 | Setup + skeleton | both | DONE (this repo) |
-| M1 | Data + seed + base config | A | DONE (seed data, ConfigService, GET /customers /products /couriers /courier-stats) |
+| # | Module | Owner | Status                                                                                         |
+|---|---|---|------------------------------------------------------------------------------------------------|
+| M0 | Setup + skeleton | both | DONE (this repo)                                                                               |
+| M1 | Data + seed + base config | A | DONE (seed data, ConfigService, GET /customers /products /couriers /courier-stats)             |
 | M2 | Order intake | A | DONE (basic): POST /orders, store webhook, GET /orders. Sharpen address quality if time allows |
-| M3 | Order-health score | A | TODO (stub in `scoring/RuleBasedHealthScorer`) |
-| M4 | Journey router + ProfitCalculator | A | TODO (stub router; ProfitCalculator maths done, `chooseRescueAction` is a stub) |
-| M5 | Journey execution | B | TODO (stub in `confirmation/JourneyExecutor`) |
-| M6 | Delivery events | B | TODO (stub in `delivery/DeliveryStateService`) |
-| M7 | Rescue and recovery | B | TODO (stubs in `recovery/`) |
-| M8 | Trust points | A | TODO (stub `TrustPointsService.recordEvent`; tier maths done) |
-| M9 | Audit log + config API | A | AuditService DONE; `PUT /config/{key}` TODO |
-| M10 | Security (API key) | B | TODO, last |
-| M11a | Simulator | A | TODO (stub endpoints) |
-| M11b | Dashboard | B | TODO (`/metrics/summary` has simple counts) |
-| M11c | Demo endpoint + packaging | B | `/demo/run` runs step 1 only |
+| M3 | Order-health score | A | TODO (stub in `scoring/RuleBasedHealthScorer`)                                                 |
+| M4 | Journey router + ProfitCalculator | A | TODO (stub router; ProfitCalculator maths done, `chooseRescueAction` is a stub)                |
+| M5 | Journey execution | B | TODO (stub in `confirmation/JourneyExecutor`)                                                  |
+| M6 | Delivery events | B | TODO (stub in `delivery/DeliveryStateService`)                                                 |
+| M7 | Rescue and recovery | B | TODO (stubs in `recovery/`)                                                                    |
+| M8 | Trust points | A | DONE (stub `TrustPointsService.recordEvent`; tier maths done)                                  |
+| M9 | Audit log + config API | A | AuditService DONE; `PUT /config/{key}` TODO                                                    |
+| M10 | Security (API key) | B | TODO, last                                                                                     |
+| M11a | Simulator | A | TODO (stub endpoints)                                                                          |
+| M11b | Dashboard | B | TODO (`/metrics/summary` has simple counts)                                                    |
+| M11c | Demo endpoint + packaging | B | `/demo/run` runs step 1 only                                                                   |
 
 ## Contracts between you two (a signature change = tell the other person + edit this table)
 
