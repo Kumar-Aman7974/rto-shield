@@ -1,5 +1,6 @@
 package com.rtoshield.trust;
 
+import com.rtoshield.audit.AuditService;
 import com.rtoshield.common.NotFoundException;
 import com.rtoshield.config.ConfigKeys;
 import com.rtoshield.config.ConfigService;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
  *  - Different events on one order all count (e.g. UNREACHABLE on attempt 1, then REFUSED on attempt 2).
  *  - If orderId is null, the event is always recorded (used for manual or order-less events).
  *  - Point values come from config (trust.points.*), never hardcoded.
+ *  - Every recorded event also writes one audit row (an ignored duplicate does not).
  */
 @Service
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class TrustPointsService {
     private final ConfigService config;
     private final CustomerRepository customers;
     private final TrustLedgerRepository ledger;
+    private final AuditService audit;
 
     @Transactional
     public void recordEvent(Long customerId, Long orderId, TrustEventType eventType) {
@@ -56,10 +59,17 @@ public class TrustPointsService {
         entry.setDelta(delta);
         ledger.save(entry);
 
+        int oldBalance = customer.getTrustBalance();
         CustomerTier oldTier = customer.getTier();
         customer.setTrustBalance(newBalance);
         customer.setTier(tierFor(newBalance));
         customers.save(customer);
+
+        String where = orderId == null ? "with no order" : "on order " + orderId;
+        audit.record(orderId, "TRUST_" + eventType,
+                eventType + " " + where + ": " + (delta > 0 ? "+" : "") + delta + " points, balance "
+                        + oldBalance + " -> " + newBalance + ", tier " + oldTier + " -> " + customer.getTier(),
+                "customer=" + customerId + ", delta=" + delta + ", balance=" + newBalance + ", tier=" + customer.getTier());
 
         log.info("Trust event recorded: customer={}, order={}, event={}, delta={}, balance={}, tier {} -> {}",
                 customerId, orderId, eventType, delta, newBalance, oldTier, customer.getTier());

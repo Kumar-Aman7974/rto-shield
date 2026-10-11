@@ -1,16 +1,22 @@
 package com.rtoshield.testsupport;
 
+import com.rtoshield.domain.AuditLog;
 import com.rtoshield.domain.ConfigEntry;
 import com.rtoshield.domain.Courier;
 import com.rtoshield.domain.CourierPincodeStat;
+import com.rtoshield.repo.AuditLogRepository;
 import com.rtoshield.repo.ConfigEntryRepository;
 import com.rtoshield.repo.CourierPincodeStatRepository;
 import com.rtoshield.repo.CourierRepository;
 
+import org.springframework.data.domain.Pageable;
+
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -37,7 +43,36 @@ public final class Fakes {
         return proxy(ConfigEntryRepository.class, (method, args) -> switch (method) {
             case "findById" -> Optional.ofNullable(rows.get((String) args[0]));
             case "existsById" -> rows.containsKey((String) args[0]);
+            case "findAll" -> new ArrayList<>(rows.values());
+            case "save" -> {
+                ConfigEntry entry = (ConfigEntry) args[0];
+                rows.put(entry.getKey(), entry);
+                yield entry;
+            }
             default -> throw new UnsupportedOperationException("ConfigEntryRepository." + method);
+        });
+    }
+
+    /** audit_log table backed by a list (ids are 1, 2, 3 ... in the order rows are saved). */
+    public static AuditLogRepository auditRepo(List<AuditLog> rows) {
+        return proxy(AuditLogRepository.class, (method, args) -> switch (method) {
+            case "save" -> {
+                AuditLog row = (AuditLog) args[0];
+                if (row.getId() == null) {
+                    row.setId(rows.size() + 1L);
+                }
+                rows.add(row);
+                yield row;
+            }
+            case "findByOrderIdOrderByCreatedAtAsc" -> rows.stream()
+                    .filter(r -> Objects.equals(r.getOrderId(), args[0])).toList();
+            case "findAllByOrderByIdDesc" -> {
+                int size = ((Pageable) args[0]).getPageSize();
+                List<AuditLog> newestFirst = new ArrayList<>(rows);
+                Collections.reverse(newestFirst);
+                yield newestFirst.stream().limit(size).toList();
+            }
+            default -> throw new UnsupportedOperationException("AuditLogRepository." + method);
         });
     }
 

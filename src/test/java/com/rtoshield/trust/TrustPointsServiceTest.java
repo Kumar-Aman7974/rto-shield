@@ -1,8 +1,10 @@
 package com.rtoshield.trust;
 
+import com.rtoshield.audit.AuditService;
 import com.rtoshield.common.NotFoundException;
 import com.rtoshield.config.ConfigKeys;
 import com.rtoshield.config.ConfigService;
+import com.rtoshield.domain.AuditLog;
 import com.rtoshield.domain.ConfigEntry;
 import com.rtoshield.domain.Customer;
 import com.rtoshield.domain.CustomerTier;
@@ -11,6 +13,7 @@ import com.rtoshield.domain.TrustLedgerEntry;
 import com.rtoshield.repo.ConfigEntryRepository;
 import com.rtoshield.repo.CustomerRepository;
 import com.rtoshield.repo.TrustLedgerRepository;
+import com.rtoshield.testsupport.Fakes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,6 +43,7 @@ class TrustPointsServiceTest {
 
     private final Map<String, ConfigEntry> configRows = new HashMap<>();
     private final List<TrustLedgerEntry> ledgerRows = new ArrayList<>();
+    private final List<AuditLog> auditRows = new ArrayList<>();
     private Customer customer;
     private TrustPointsService service;
 
@@ -47,6 +51,7 @@ class TrustPointsServiceTest {
     void setUp() {
         configRows.clear();
         ledgerRows.clear();
+        auditRows.clear();
         customer = new Customer();
         customer.setId(1L);
         customer.setName("Test Customer");
@@ -54,7 +59,8 @@ class TrustPointsServiceTest {
         customer.setTrustBalance(0);
         customer.setTier(CustomerTier.GOOD);
         service = new TrustPointsService(
-                new ConfigService(fakeConfigRepo()), fakeCustomerRepo(), fakeLedgerRepo());
+                new ConfigService(fakeConfigRepo()), fakeCustomerRepo(), fakeLedgerRepo(),
+                new AuditService(Fakes.auditRepo(auditRows)));
     }
 
     // ------------------------------------------------------------------ points
@@ -209,6 +215,48 @@ class TrustPointsServiceTest {
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("99");
         assertThat(ledgerRows).isEmpty();
+    }
+
+    // ------------------------------------------------------------------ audit log
+
+    @Test
+    void everyRecordedEventWritesOneAuditRow() {
+        service.recordEvent(1L, 101L, TrustEventType.REFUSED);
+
+        assertThat(auditRows).hasSize(1);
+        AuditLog row = auditRows.get(0);
+        assertThat(row.getOrderId()).isEqualTo(101L);
+        assertThat(row.getDecision()).isEqualTo("TRUST_REFUSED");
+        assertThat(row.getReason()).isEqualTo("REFUSED on order 101: -30 points, balance 0 -> -30, tier GOOD -> CAUTION");
+        assertThat(row.getInputs()).isEqualTo("customer=1, delta=-30, balance=-30, tier=CAUTION");
+    }
+
+    @Test
+    void positiveEventsShowAPlusSign() {
+        customer.setTrustBalance(30);
+
+        service.recordEvent(1L, 7L, TrustEventType.DELIVERED);
+
+        assertThat(auditRows.get(0).getReason())
+                .isEqualTo("DELIVERED on order 7: +10 points, balance 30 -> 40, tier GOOD -> GOOD");
+    }
+
+    @Test
+    void eventWithoutAnOrderSaysSo() {
+        service.recordEvent(1L, null, TrustEventType.REFUSED);
+
+        assertThat(auditRows.get(0).getReason()).startsWith("REFUSED with no order: -30 points");
+    }
+
+    @Test
+    void ignoredDuplicateAndUnknownCustomerWriteNoAuditRow() {
+        service.recordEvent(1L, 101L, TrustEventType.REFUSED);
+        service.recordEvent(1L, 101L, TrustEventType.REFUSED);
+        assertThat(auditRows).hasSize(1);
+
+        assertThatThrownBy(() -> service.recordEvent(99L, 5L, TrustEventType.REFUSED))
+                .isInstanceOf(NotFoundException.class);
+        assertThat(auditRows).hasSize(1);
     }
 
     // ------------------------------------------------------------- in-memory fakes
