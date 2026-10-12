@@ -32,7 +32,7 @@ Mark TODO / DOING / DONE here when you start and finish.
 | M2 | Order intake | A | DONE: POST /orders, store webhook, GET /orders. Address quality now depends on the address text only |
 | M3 | Order-health score | A | DONE (rules from config, reasons add up to the score) |
 | M4 | Journey router + ProfitCalculator | A | DONE (7 journeys, profit-based choice, CourierRecommender). `chooseRescueAction` is still a stub (needed by M7) |
-| M5 | Journey execution | B | TODO (stub in confirmation/JourneyExecutor) |
+| M5 | Journey execution | B | DONE (JourneyExecutor implemented) |
 | M6 | Delivery events | B | **DONE** (delivery/DeliveryStateService, OrderLocker, 24 unit tests) |
 | M7 | Rescue and recovery | B | TODO (stubs in recovery/) |
 | M8 | Trust points | A | DONE (append-only ledger, count-once rule, writes an audit row) |
